@@ -59,3 +59,11 @@ func directoryWalk(root string) ([]string, error) {
 	})
 	return files, err
 }
+
+func findPlainTextAnsibleSecrets(secretsFiles []string) ([]string, error) {
+
+	var err error
+	var plainTextSecretFiles []string
+
+	return plainTextSecretFiles, err
+}

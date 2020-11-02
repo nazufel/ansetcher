@@ -165,7 +165,7 @@ func Test_findAnsibleSecrets(t *testing.T) {
 	}
 
 	// create test files to walk
-	testSecretsFiles := [4]string{"test-inventories/development/secrets.yml",
+	testSecretsFiles := []string{"test-inventories/development/secrets.yml",
 		"test-inventories/production/secrets.yml",
 		"test-inventories/qa/secrets.yml",
 		"test-inventories/stage/secrets.yml"}
@@ -191,9 +191,13 @@ func Test_findAnsibleSecrets(t *testing.T) {
 	// run tests //
 	///////////////
 
-	plainTextSecretFiles, err := findAnsibleSecrets(testSecretsFiles)
-	if err :=  nil {
+	plainTextSecretFiles, err := findPlainTextAnsibleSecrets(testSecretsFiles)
+	if err != nil {
 		log.Fatal(err)
+	}
+
+	if len(plainTextSecretFiles) != 4 {
+		t.Errorf("expected to find 4 plain text ansible secrets files, found %v", len(plainTextSecretFiles))
 	}
 
 	//////////////
