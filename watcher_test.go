@@ -171,9 +171,9 @@ func Test_findAnsibleSecrets(t *testing.T) {
 		fileContent []byte
 		permissions os.FileMode
 	}{
-		{"test-inventories/development/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AES256\n1234123412341234\n1234"), 0777},
-		{"test-inventories/production/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AES256\n12341234123412341\n1234"), 0777},
-		{"test-inventories/qa/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AES256\n1234123412341234\n1234"), 0777},
+		{"test-inventories/development/secrets.yml", []byte("plaintext secret. not good!"), 0777},
+		{"test-inventories/production/secrets.yml", []byte("plaintext secret. not good!"), 0777},
+		{"test-inventories/qa/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AES256\n12341234123412341\n1234"), 0777},
 		{"test-inventories/stage/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AES256\n12341234123432\n1234"), 0777},
 	}
 
@@ -209,15 +209,18 @@ func Test_findAnsibleSecrets(t *testing.T) {
 	// run tests //
 	///////////////
 
-	plainTextSecretFiles := findPlainTextAnsibleSecrets(testSecretFilePaths)
+	plainTextSecretFiles, _ := findPlainTextAnsibleSecrets(testSecretFilePaths)
+
+	log.Println(plainTextSecretFiles)
 
 	// test 0: returned text paths should equal a certain number
-	if len(plainTextSecretFiles) != 0 {
-		t.Errorf("expected to find 0 plain text ansible secrets files, found %v", len(plainTextSecretFiles))
+	if len(plainTextSecretFiles) != 2 {
+		t.Errorf("expected to find 2 plain text ansible secrets files, found %v", len(plainTextSecretFiles))
 	}
 
 	// test 1: returned text paths should have certain files
 	for rf := range plainTextSecretFiles {
+		// skip over the first and third plainTextSecretFiles since they are actually plain text
 		if plainTextSecretFiles[rf] != testSecretFilePaths[rf] {
 			t.Errorf("expected returned file: %v to equal secret test file: %v", plainTextSecretFiles[rf], testSecretFilePaths[rf])
 		}
@@ -238,5 +241,9 @@ func Test_findAnsibleSecrets(t *testing.T) {
 		log.Fatal(err)
 	}
 }
+
+// func Test_printErrorMessage(t *testing.T) {
+// 	plainTextSecretFiles []string
+// }
 
 //EOF

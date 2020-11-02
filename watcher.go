@@ -26,7 +26,7 @@ func watcher() error {
 		log.Fatal(err)
 	}
 
-	plainTextAnsibleSecretFiles := findPlainTextAnsibleSecrets(secretFiles)
+	plainTextAnsibleSecretFiles, err := findPlainTextAnsibleSecrets(secretFiles)
 
 	if len(plainTextAnsibleSecretFiles) != 0 {
 		for f := range plainTextAnsibleSecretFiles {
@@ -63,7 +63,7 @@ func directoryWalk(root string) ([]string, error) {
 	return files, err
 }
 
-func findPlainTextAnsibleSecrets(secretsFiles []string) []string {
+func findPlainTextAnsibleSecrets(secretsFiles []string) ([]string, error) {
 
 	var plainTextSecretFiles []string
 
@@ -71,6 +71,7 @@ func findPlainTextAnsibleSecrets(secretsFiles []string) []string {
 		file, err := os.Open(secretsFiles[sf])
 		if err != nil {
 			log.Fatalf("failed to open %v: %s", file, err)
+			return nil, err
 		}
 		defer file.Close()
 
@@ -87,5 +88,5 @@ func findPlainTextAnsibleSecrets(secretsFiles []string) []string {
 		}
 	}
 
-	return plainTextSecretFiles
+	return plainTextSecretFiles, nil
 }
