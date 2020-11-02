@@ -2,9 +2,11 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var inventoryRootNotFound = errors.New("could not find provided inventory root")
@@ -19,6 +21,15 @@ func watcher() error {
 		return err
 	}
 
+	secretFiles, err := directoryWalk(inventoryRoot)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for sf := range secretFiles {
+		fmt.Println(secretFiles[sf])
+	}
+
 	return err
 }
 
@@ -27,20 +38,22 @@ func checkForInventoryRoot(dir string) error {
 
 	// check that the inventory root file exists
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		log.Println(err)
+		log.Println(inventoryRootNotFound)
 		return inventoryRootNotFound
 	}
 
+	log.Printf("found %v, proceeding", dir)
 	return nil
 }
 
 // directoryWalk walks directories from the root directory and looks for files that match a certain naming pattern. for now, that is "secrets.yml," but will be expanded later
 func directoryWalk(root string) ([]string, error) {
-	// TODO: stopped here. have a solid unit test. now need to get this func working
 	var files []string
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
-			files = append(files, path)
+			if strings.Contains(info.Name(), "secrets.yml") {
+				files = append(files, path)
+			}
 		}
 		return nil
 	})
