@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -27,10 +26,13 @@ func watcher() error {
 		log.Fatal(err)
 	}
 
-	for sf := range secretFiles {
-		fmt.Println(secretFiles[sf])
-	}
+	plainTextAnsibleSecretFiles := findPlainTextAnsibleSecrets(secretFiles)
 
+	if len(plainTextAnsibleSecretFiles) != 0 {
+		for f := range plainTextAnsibleSecretFiles {
+			log.Println(plainTextAnsibleSecretFiles[f])
+		}
+	}
 	return err
 }
 
@@ -61,7 +63,7 @@ func directoryWalk(root string) ([]string, error) {
 	return files, err
 }
 
-func findPlainTextAnsibleSecrets(secretsFiles []string) ([]string, error) {
+func findPlainTextAnsibleSecrets(secretsFiles []string) []string {
 
 	var plainTextSecretFiles []string
 
@@ -80,12 +82,10 @@ func findPlainTextAnsibleSecrets(secretsFiles []string) ([]string, error) {
 			textLines = append(textLines, scanner.Text())
 		}
 
-		if !strings.Contains(textLines[0], "$ANSIBLE_VAULT;1.1;AE265") {
+		if !strings.Contains(textLines[0], "$ANSIBLE_VAULT;1.1;AES256") {
 			plainTextSecretFiles = append(plainTextSecretFiles, secretsFiles[sf])
 		}
 	}
 
-	log.Println(plainTextSecretFiles)
-
-	return plainTextSecretFiles, nil
+	return plainTextSecretFiles
 }

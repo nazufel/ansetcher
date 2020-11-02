@@ -171,10 +171,10 @@ func Test_findAnsibleSecrets(t *testing.T) {
 		fileContent []byte
 		permissions os.FileMode
 	}{
-		{"test-inventories/development/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AE256"), 0777},
-		{"test-inventories/production/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AE256"), 0777},
-		{"test-inventories/qa/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AE256"), 0777},
-		{"test-inventories/stage/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AE256"), 0777},
+		{"test-inventories/development/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AES256\n1234123412341234\n1234"), 0777},
+		{"test-inventories/production/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AES256\n12341234123412341\n1234"), 0777},
+		{"test-inventories/qa/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AES256\n1234123412341234\n1234"), 0777},
+		{"test-inventories/stage/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AES256\n12341234123432\n1234"), 0777},
 	}
 
 	// create test files to walk
@@ -209,10 +209,7 @@ func Test_findAnsibleSecrets(t *testing.T) {
 	// run tests //
 	///////////////
 
-	plainTextSecretFiles, err := findPlainTextAnsibleSecrets(testSecretFilePaths)
-	if err != nil {
-		log.Fatal(err)
-	}
+	plainTextSecretFiles := findPlainTextAnsibleSecrets(testSecretFilePaths)
 
 	// test 0: returned text paths should equal a certain number
 	if len(plainTextSecretFiles) != 0 {
