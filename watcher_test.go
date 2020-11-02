@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -165,41 +166,72 @@ func Test_findAnsibleSecrets(t *testing.T) {
 	}
 
 	// create test files to walk
-	testSecretsFiles := []string{"test-inventories/development/secrets.yml",
-		"test-inventories/production/secrets.yml",
-		"test-inventories/qa/secrets.yml",
-		"test-inventories/stage/secrets.yml"}
+	testSecretFiles := []struct {
+		filePath    string
+		fileContent []byte
+		permissions os.FileMode
+	}{
+		{"test-inventories/development/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AE256"), 0777},
+		{"test-inventories/production/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AE256"), 0777},
+		{"test-inventories/qa/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AE256"), 0777},
+		{"test-inventories/stage/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AE256"), 0777},
+	}
 
 	// create test files to walk
-	testDefaultsFiles := [4]string{"test-inventories/development/defaults.yml",
-		"test-inventories/production/defaults.yml",
-		"test-inventories/qa/defaults.yml",
-		"test-inventories/stage/defaults.yml"}
-
-	for f := range testSecretsFiles {
-		if _, err := os.Create(testSecretsFiles[f]); err != nil {
-			log.Fatal(err)
-		}
+	testDefaultFiles := []struct {
+		filePath    string
+		fileContent []byte
+		permissions os.FileMode
+	}{
+		{"test-inventories/development/defaults.yml", []byte("not a secret"), 0777},
+		{"test-inventories/production/defaults.yml", []byte("not a secret"), 0777},
+		{"test-inventories/qa/defaults.yml", []byte("not a secret"), 0777},
+		{"test-inventories/stage/defaults.yml", []byte("not a secret"), 0777},
 	}
 
-	for f := range testDefaultsFiles {
-		if _, err := os.Create(testDefaultsFiles[f]); err != nil {
+	var testSecretFilePaths []string
+	var testDefaultFilePaths []string
+
+	for _, tf := range testSecretFiles {
+		if err := ioutil.WriteFile(tf.filePath, tf.fileContent, tf.permissions); err != nil {
 			log.Fatal(err)
 		}
+		testSecretFilePaths = append(testSecretFilePaths, tf.filePath)
 	}
+	for _, tf := range testDefaultFiles {
+		if err := ioutil.WriteFile(tf.filePath, tf.fileContent, tf.permissions); err != nil {
+			log.Fatal(err)
+		}
+		testDefaultFilePaths = append(testDefaultFilePaths, tf.filePath)
+	}
+
 	///////////////
 	// run tests //
 	///////////////
 
-	plainTextSecretFiles, err := findPlainTextAnsibleSecrets(testSecretsFiles)
+	plainTextSecretFiles, err := findPlainTextAnsibleSecrets(testSecretFilePaths)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if len(plainTextSecretFiles) != 4 {
-		t.Errorf("expected to find 4 plain text ansible secrets files, found %v", len(plainTextSecretFiles))
+	// test 0: returned text paths should equal a certain number
+	if len(plainTextSecretFiles) != 0 {
+		t.Errorf("expected to find 0 plain text ansible secrets files, found %v", len(plainTextSecretFiles))
 	}
 
+	// test 1: returned text paths should have certain files
+	for rf := range plainTextSecretFiles {
+		if plainTextSecretFiles[rf] != testSecretFilePaths[rf] {
+			t.Errorf("expected returned file: %v to equal secret test file: %v", plainTextSecretFiles[rf], testSecretFilePaths[rf])
+		}
+	}
+
+	// test 2: returned text paths should not have certain files
+	for rf := range plainTextSecretFiles {
+		if plainTextSecretFiles[rf] == testDefaultFilePaths[rf] {
+			t.Errorf("expected returned file: %v to not equal default test file: %v", plainTextSecretFiles[rf], testDefaultFilePaths[rf])
+		}
+	}
 	//////////////
 	// teardown //
 	//////////////

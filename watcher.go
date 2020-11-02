@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"log"
@@ -62,8 +63,29 @@ func directoryWalk(root string) ([]string, error) {
 
 func findPlainTextAnsibleSecrets(secretsFiles []string) ([]string, error) {
 
-	var err error
 	var plainTextSecretFiles []string
 
-	return plainTextSecretFiles, err
+	for sf := range secretsFiles {
+		file, err := os.Open(secretsFiles[sf])
+		if err != nil {
+			log.Fatalf("failed to open %v: %s", file, err)
+		}
+		defer file.Close()
+
+		scanner := bufio.NewScanner(file)
+		scanner.Split(bufio.ScanLines)
+		var textLines []string
+
+		for scanner.Scan() {
+			textLines = append(textLines, scanner.Text())
+		}
+
+		if !strings.Contains(textLines[0], "$ANSIBLE_VAULT;1.1;AE265") {
+			plainTextSecretFiles = append(plainTextSecretFiles, secretsFiles[sf])
+		}
+	}
+
+	log.Println(plainTextSecretFiles)
+
+	return plainTextSecretFiles, nil
 }
