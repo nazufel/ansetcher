@@ -4,7 +4,7 @@
 *.dll
 *.so
 *.dylib
-pre-commit*
+pre-commit
 ansible-secrets-watcher
 main
 

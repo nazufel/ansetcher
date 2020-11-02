@@ -14,9 +14,13 @@ create_run_files:
 # package the binaries for different operating systems
 package:
 	$(clean_command)
-	GOOS=linux GOOARCH=amd64 go build -o pre-commit-x86-64-linux-0-0-1
-	GOOS=darwin GOOARCH=amd64 go build -o pre-commit-x86-64-darwin-0-0-1
-	GOOS=windows GOOARCH=amd64 go build -o pre-commit-x86-64-windows-0-0-1
+	go test -v
+	rm -rf releases/
+	mkdir releases/
+	GOOS=linux GOOARCH=amd64 go build -o pre-commit-x86-64-linux-1-0-0
+	GOOS=darwin GOOARCH=amd64 go build -o pre-commit-x86-64-darwin-1-0-0
+	GOOS=windows GOOARCH=amd64 go build -o pre-commit-x86-64-windows-1-0-0
+	mv pre-commit* releases/
 
 # build and run the binary
 run:

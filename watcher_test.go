@@ -211,8 +211,6 @@ func Test_findAnsibleSecrets(t *testing.T) {
 
 	plainTextSecretFiles, _ := findPlainTextAnsibleSecrets(testSecretFilePaths)
 
-	log.Println(plainTextSecretFiles)
-
 	// test 0: returned text paths should equal a certain number
 	if len(plainTextSecretFiles) != 2 {
 		t.Errorf("expected to find 2 plain text ansible secrets files, found %v", len(plainTextSecretFiles))
@@ -236,14 +234,10 @@ func Test_findAnsibleSecrets(t *testing.T) {
 	// teardown //
 	//////////////
 
-	// clean up test-inventories dir for a clean slate to test on
-	if err := os.RemoveAll("test-inventories"); err != nil {
-		log.Fatal(err)
-	}
+	// // clean up test-inventories dir for a clean slate to test on
+	// if err := os.RemoveAll("test-inventories"); err != nil {
+	// 	log.Fatal(err)
+	// }
 }
-
-// func Test_printErrorMessage(t *testing.T) {
-// 	plainTextSecretFiles []string
-// }
 
 //EOF

@@ -10,6 +10,7 @@ import (
 )
 
 var inventoryRootNotFound = errors.New("could not find provided inventory root")
+var plainTextSecretsFound = errors.New("found plaintext secrets")
 
 // watcher func boostraps the rest of the program
 func watcher() error {
@@ -29,11 +30,10 @@ func watcher() error {
 	plainTextAnsibleSecretFiles, err := findPlainTextAnsibleSecrets(secretFiles)
 
 	if len(plainTextAnsibleSecretFiles) != 0 {
-		for f := range plainTextAnsibleSecretFiles {
-			log.Println(plainTextAnsibleSecretFiles[f])
-		}
+		err := printErrorMessage(plainTextAnsibleSecretFiles)
+		return err
 	}
-	return err
+	return nil
 }
 
 // checks to see if the inventory root passed exists, if not, it throws an error
@@ -45,7 +45,7 @@ func checkForInventoryRoot(dir string) error {
 		return inventoryRootNotFound
 	}
 
-	log.Printf("found %v, proceeding", dir)
+	log.Printf("found inventory root to walk: %v, proceeding", dir)
 	return nil
 }
 
@@ -90,3 +90,14 @@ func findPlainTextAnsibleSecrets(secretsFiles []string) ([]string, error) {
 
 	return plainTextSecretFiles, nil
 }
+
+// prints the error message when plaintext secrets are found
+func printErrorMessage(plainTextSecretFiles []string) error {
+
+	for pt := range plainTextSecretFiles {
+		log.Printf("Error! Found Ansible Vault secrets file in plaintext during commit: %v. Please encrypt the file and reattempt to commit.", plainTextSecretFiles[pt])
+	}
+	return plainTextSecretsFound
+}
+
+//EOF
