@@ -86,7 +86,7 @@ func Test_walkDirectories(t *testing.T) {
 		"./test-inventories/production/secrets.yml"}
 
 	// create test files to walk
-	testDefaultsFiles := [8]string{"./test-inventories/development/defaults.yml",
+	testDefaultsFiles := [4]string{"./test-inventories/development/defaults.yml",
 		"./test-inventories/qa/defaults.yml",
 		"./test-inventories/stage/defaults.yml",
 		"./test-inventories/production/defaults.yml"}
