@@ -57,4 +57,18 @@ Changes not staged for commit:
 no changes added to commit (use "git add" and/or "git commit -a")
 ```
 
-There are still files showing they have changes that need to be committed.
+There are still files showing they have changes that need to be committed. After properly Ansible Vault encrypting the files we are finally able to commit the changes.
+
+```sh
+git commit -am "commiting some awesome new functionality and encrypted vault secrets"
+2020/11/02 14:39:31 found inventory root to walk: ./inventories, proceeding
+[main a34c94f] commiting some awesome new functionality and encrypted vault secrets
+ 2 files changed, 19 insertions(+), 11 deletions(-)
+ rewrite README.md (88%)
+rross@gloomwalker ~/go/src/github.com/nazufel/ansible-secrets-watcher (main) $ git status
+On branch main
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
+
+nothing added to commit but untracked files present (use "git add" to track)
+```

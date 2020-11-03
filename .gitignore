@@ -7,7 +7,7 @@
 pre-commit
 ansible-secrets-watcher
 main
-
+inventories
 # Test binary, built with `go test -c`
 *.test
 test-inventories*
