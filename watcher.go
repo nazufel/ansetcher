@@ -45,7 +45,6 @@ func checkForInventoryRoot(dir string) error {
 		return inventoryRootNotFound
 	}
 
-	log.Printf("found inventory root to walk: %v, proceeding", dir)
 	return nil
 }
 

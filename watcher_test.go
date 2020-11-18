@@ -234,10 +234,10 @@ func Test_findAnsibleSecrets(t *testing.T) {
 	// teardown //
 	//////////////
 
-	// // clean up test-inventories dir for a clean slate to test on
-	// if err := os.RemoveAll("test-inventories"); err != nil {
-	// 	log.Fatal(err)
-	// }
+	// clean up test-inventories dir for a clean slate to test on
+	if err := os.RemoveAll("test-inventories"); err != nil {
+		log.Fatal(err)
+	}
 }
 
 //EOF
