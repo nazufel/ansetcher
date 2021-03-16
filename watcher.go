@@ -3,31 +3,42 @@ package main
 import (
 	"bufio"
 	"errors"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"gopkg.in/yaml.v2"
 )
 
-var inventoryRootNotFound = errors.New("could not find provided inventory root")
-var plainTextSecretsFound = errors.New("found plaintext secrets")
+var inventoryLocationVariableNotFound = errors.New("ansible-secrets-watcher: ANSIBLE_INVENTORIES_ROOT is a required environment variable. Please set an environment variable to define where the Ansible inventories directory is located in relation to the root of this repository.")
+var inventoryRootNotFound = errors.New("ansible-secrets-watcher: could not find provided inventory root")
+var plainTextSecretsFound = errors.New("ansible-secrets-watcher: found plaintext secrets")
+var secretsFileNameVariableNotFound = errors.New("ansible-secrets-watcher: ANSIBLE_SECRETS_FILE_NAME is a required environment variable. Please set an environment variable to define where the Ansible inventories directory is located in relation to the root of this repository.")
+
+type conf struct {
+	// filesystem location of the Ansible inventories directory to walk 
+	// and check for unencrypted Vault secrets
+	InventoryRoot string
+
+	// the secret files name to search for
+	SecretFileName string
+}
 
 // watcher func boostraps the rest of the program
 func watcher() error {
 
 	var c conf
 
-	c.getConfig("./ansible-secrets-watcher.yaml")
+	err := c.getConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	err := checkForInventoryRoot(c.InventoryRoot)
+	err = c.checkForInventoryRoot()
 	if err != nil {
 		return err
 	}
 
-	secretFiles, err := directoryWalk(c.InventoryRoot)
+	secretFiles, err := c.directoryWalk()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,31 +52,29 @@ func watcher() error {
 	return nil
 }
 
-type conf struct {
-	InventoryRoot string
-}
+func (c *conf) getConfig() error {
 
-func (c *conf) getConfig(cf string) *conf {
-
-	f, err := ioutil.ReadFile(cf)
-	if err != nil {
-		log.Fatal("ansible-secrets-watcher could not find config file")
+	if len(os.Getenv("ANSIBLE_INVENTORIES_ROOT")) == 0 {
+		return inventoryLocationVariableNotFound
 	}
 
-	err = yaml.Unmarshal(f, c)
-	if err != nil {
-		log.Fatalf("unmarshal error: %v", err)
+	c.InventoryRoot = os.Getenv("ANSIBLE_INVENTORIES_ROOT")
+
+	if len(os.Getenv("ANSIBLE_SECRETS_FILE_NAME")) == 0 {
+		return secretsFileNameVariableNotFound
 	}
 
-	return c
+	c.SecretFileName = os.Getenv("ANSIBLE_SECRETS_FILE_NAME")
+	return nil
 }
 
 // checks to see if the inventory root passed exists, if not, it throws an error
-func checkForInventoryRoot(dir string) error {
+func (c *conf) checkForInventoryRoot() error {
 
 	// check that the inventory root file exists
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
+	if _, err := os.Stat(c.InventoryRoot); os.IsNotExist(err) {
 		log.Println(inventoryRootNotFound)
+		log.Println("ansible-secrets-watcher: searched in: %s but could not find inventory", c.InventoryRoot)
 		return inventoryRootNotFound
 	}
 
@@ -73,11 +82,11 @@ func checkForInventoryRoot(dir string) error {
 }
 
 // directoryWalk walks directories from the root directory and looks for files that match a certain naming pattern. for now, that is "secrets.yml," but will be expanded later
-func directoryWalk(root string) ([]string, error) {
+func (c *conf) directoryWalk() ([]string, error) {
 	var files []string
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(c.InventoryRoot, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
-			if strings.Contains(info.Name(), "secrets.yml") {
+			if strings.Contains(info.Name(), c.SecretFileName) {
 				files = append(files, path)
 			}
 		}
@@ -118,7 +127,7 @@ func findPlainTextAnsibleSecrets(secretsFiles []string) ([]string, error) {
 func printErrorMessage(plainTextSecretFiles []string) error {
 
 	for pt := range plainTextSecretFiles {
-		log.Printf("Error! Found Ansible Vault secrets file in plaintext during commit: %v. Please encrypt the file and reattempt to commit.", plainTextSecretFiles[pt])
+		log.Printf("ansible-secrets-watcher: ERROR! Found Ansible Vault secrets file in plaintext during commit: %v. Please encrypt the file and reattempt to commit.", plainTextSecretFiles[pt])
 	}
 	return plainTextSecretsFound
 }

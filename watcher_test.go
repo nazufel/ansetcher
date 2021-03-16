@@ -7,7 +7,14 @@ import (
 	"testing"
 )
 
-func Test_checkForInventoryRoot(t *testing.T) {
+type conf struct {
+	// filesystem location of the Ansible inventories directory to walk 
+	// and check for unencrypted Vault secrets
+	InventoryRoot string
+}
+
+
+func (c *conf) Test_checkForInventoryRoot(t *testing.T) {
 
 	////////////
 	// set up //
@@ -22,6 +29,8 @@ func Test_checkForInventoryRoot(t *testing.T) {
 	if err := os.Mkdir("test-inventories", 0777); err != nil {
 		log.Fatal(err)
 	}
+
+	c.InventoryRoot = "test-inventories"
 
 	///////////////
 	// test runs //
@@ -38,7 +47,7 @@ func Test_checkForInventoryRoot(t *testing.T) {
 
 	// test the inventory root func
 	for _, tc := range testCases {
-		err := checkForInventoryRoot(tc.inventoryPath)
+		err := c.checkForInventoryRoot()
 		if err != tc.want {
 			t.Errorf("testcase %v, expected %v, got: %v", tc.name, tc.want, err)
 		}
