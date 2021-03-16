@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2020-03-16
+### Added
+- Two configuration options to change the behavior of the secrets watcher.
+
 ## [1.0.0] - 2020-11-02
 ### Added
 - Initial program and tests [@nazufel](https://github.com/nazufel).

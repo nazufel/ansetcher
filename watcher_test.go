@@ -7,30 +7,24 @@ import (
 	"testing"
 )
 
-type conf struct {
-	// filesystem location of the Ansible inventories directory to walk 
-	// and check for unencrypted Vault secrets
-	InventoryRoot string
-}
-
-
 func (c *conf) Test_checkForInventoryRoot(t *testing.T) {
 
 	////////////
 	// set up //
 	////////////
 
+
+	c.InventoryRoot = "test-inventories"
+
 	// make sure previous testing directories don't already exist
-	if err := os.RemoveAll("test-inventories"); err != nil {
+	if err := os.RemoveAll(c.InventoryRoot); err != nil {
 		log.Fatal(err)
 	}
 
 	// create test inventory root
-	if err := os.Mkdir("test-inventories", 0777); err != nil {
+	if err := os.Mkdir(c.InventoryRoot, 0644); err != nil {
 		log.Fatal(err)
 	}
-
-	c.InventoryRoot = "test-inventories"
 
 	///////////////
 	// test runs //
@@ -41,8 +35,8 @@ func (c *conf) Test_checkForInventoryRoot(t *testing.T) {
 		inventoryPath string
 		want          error
 	}{
-		{"test existing inventory root", "test-inventories", nil},
-		{"test non-existent inventory", "bad-inventories/secrets.yml", inventoryRootNotFound},
+		{"test existing inventory root", c.InventoryRoot, nil},
+		{"test non-existent inventory", "bad-inventories", inventoryRootNotFound},
 	}
 
 	// test the inventory root func
@@ -58,12 +52,12 @@ func (c *conf) Test_checkForInventoryRoot(t *testing.T) {
 	///////////////
 
 	// cleanup testing directories
-	if err := os.RemoveAll("test-inventories"); err != nil {
+	if err := os.RemoveAll(c.InventoryRoot); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func Test_walkDirectories(t *testing.T) {
+func (c *conf) Test_walkDirectories(t *testing.T) {
 
 	// TODO: clean up test dirs and files even if the test fail
 
@@ -71,35 +65,39 @@ func Test_walkDirectories(t *testing.T) {
 	// setup //
 	///////////
 
+
+	c.InventoryRoot = "test-inventories"
+	c.SecretFileName = "secrets.yaml"
+
 	// clean up test-inventories dir for a clean slate to test on
-	if err := os.RemoveAll("test-inventories"); err != nil {
+	if err := os.RemoveAll(c.InventoryRoot); err != nil {
 		log.Println(err)
 	}
 
 	// create test directories to walk
-	testDirectories := [5]string{"test-inventories",
-		"test-inventories/development",
-		"test-inventories/qa",
-		"test-inventories/stage",
-		"test-inventories/production"}
+	testDirectories := [5]string{c.InventoryRoot,
+		c.InventoryRoot + "/development",
+		c.InventoryRoot + "/qa",
+		c.InventoryRoot + "/stage",
+		c.InventoryRoot + "/production"}
 
 	for d := range testDirectories {
-		if err := os.Mkdir(testDirectories[d], 0777); err != nil {
+		if err := os.Mkdir(testDirectories[d], 0644); err != nil {
 			log.Fatal(err)
 		}
 	}
 
 	// create test files to walk
-	testSecretsFiles := [4]string{"test-inventories/development/secrets.yml",
-		"test-inventories/production/secrets.yml",
-		"test-inventories/qa/secrets.yml",
-		"test-inventories/stage/secrets.yml"}
+	testSecretsFiles := [4]string{c.InventoryRoot + "/development/" + c.SecretFileName,
+		c.InventoryRoot + "/production/" + c.SecretFileName,
+		c.InventoryRoot + "/qa/" + c.SecretFileName,
+		c.InventoryRoot + "/stage/" + c.SecretFileName}
 
 	// create test files to walk
-	testDefaultsFiles := [4]string{"test-inventories/development/defaults.yml",
-		"test-inventories/production/defaults.yml",
-		"test-inventories/qa/defaults.yml",
-		"test-inventories/stage/defaults.yml"}
+	testDefaultsFiles := [4]string{c.InventoryRoot + "/development/defaults.yml",
+		c.InventoryRoot + "/production/defaults.yml",
+		c.InventoryRoot + "/qa/defaults.yml",
+		c.InventoryRoot + "/stage/defaults.yml"}
 
 	for f := range testSecretsFiles {
 		if _, err := os.Create(testSecretsFiles[f]); err != nil {
@@ -117,9 +115,7 @@ func Test_walkDirectories(t *testing.T) {
 	// run tests //
 	///////////////
 
-	inventoryRoot := "test-inventories"
-
-	walkedFiles, err := directoryWalk(inventoryRoot)
+	walkedFiles, err := c.directoryWalk()
 	if err != nil {
 		t.Error(err)
 	}
@@ -127,7 +123,7 @@ func Test_walkDirectories(t *testing.T) {
 	// test if the legnth of walked files is expected
 	if len(walkedFiles) != 4 {
 		// clean up test-inventories dir for a clean slate to test on
-		if err := os.RemoveAll("test-inventories"); err != nil {
+		if err := os.RemoveAll(c.InventoryRoot); err != nil {
 			log.Fatal(err)
 		}
 		t.Errorf("expected to find: %v secrets files, found: %v", 4, len(walkedFiles))
@@ -145,31 +141,31 @@ func Test_walkDirectories(t *testing.T) {
 	//////////////
 
 	// clean up test-inventories dir for a clean slate to test on
-	if err := os.RemoveAll("test-inventories"); err != nil {
+	if err := os.RemoveAll(c.InventoryRoot); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func Test_findAnsibleSecrets(t *testing.T) {
+func (c *conf) Test_findAnsibleSecrets(t *testing.T) {
 
 	///////////
 	// setup //
 	///////////
 
 	// clean up test-inventories dir for a clean slate to test on
-	if err := os.RemoveAll("test-inventories"); err != nil {
+	if err := os.RemoveAll(c.InventoryRoot); err != nil {
 		log.Println(err)
 	}
 
 	// create test directories to walk
-	testDirectories := [5]string{"test-inventories",
-		"test-inventories/development",
-		"test-inventories/qa",
-		"test-inventories/stage",
-		"test-inventories/production"}
+	testDirectories := [5]string{c.InventoryRoot,
+		c.InventoryRoot + "/development",
+		c.InventoryRoot + "/qa",
+		c.InventoryRoot + "/stage",
+		c.InventoryRoot + "/production"}
 
 	for d := range testDirectories {
-		if err := os.Mkdir(testDirectories[d], 0777); err != nil {
+		if err := os.Mkdir(testDirectories[d], 0644); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -180,10 +176,10 @@ func Test_findAnsibleSecrets(t *testing.T) {
 		fileContent []byte
 		permissions os.FileMode
 	}{
-		{"test-inventories/development/secrets.yml", []byte("plaintext secret. not good!"), 0777},
-		{"test-inventories/production/secrets.yml", []byte("plaintext secret. not good!"), 0777},
-		{"test-inventories/qa/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AES256\n12341234123412341\n1234"), 0777},
-		{"test-inventories/stage/secrets.yml", []byte("$ANSIBLE_VAULT;1.1;AES256\n12341234123432\n1234"), 0777},
+		{c.InventoryRoot + "/development/" + c.SecretFileName, []byte("plaintext secret. not good!"), 0644},
+		{c.InventoryRoot + "/production/" + c.SecretFileName, []byte("plaintext secret. not good!"), 0644},
+		{c.InventoryRoot + "/qa/" + c.SecretFileName, []byte("$ANSIBLE_VAULT;1.1;AES256\n12341234123412341\n1234"), 0644},
+		{c.InventoryRoot + "/stage/" + c.SecretFileName, []byte("$ANSIBLE_VAULT;1.1;AES256\n12341234123432\n1234"), 0644},
 	}
 
 	// create test files to walk
@@ -192,10 +188,10 @@ func Test_findAnsibleSecrets(t *testing.T) {
 		fileContent []byte
 		permissions os.FileMode
 	}{
-		{"test-inventories/development/defaults.yml", []byte("not a secret"), 0777},
-		{"test-inventories/production/defaults.yml", []byte("not a secret"), 0777},
-		{"test-inventories/qa/defaults.yml", []byte("not a secret"), 0777},
-		{"test-inventories/stage/defaults.yml", []byte("not a secret"), 0777},
+		{c.InventoryRoot + "/development/" + c.SecretFileName, []byte("not a secret"), 0644},
+		{c.InventoryRoot + "/production/" + c.SecretFileName, []byte("not a secret"), 0644},
+		{c.InventoryRoot + "/qa/" + c.SecretFileName, []byte("not a secret"), 0644},
+		{c.InventoryRoot + "/stage/" + c.SecretFileName, []byte("not a secret"), 0644},
 	}
 
 	var testSecretFilePaths []string
@@ -244,7 +240,7 @@ func Test_findAnsibleSecrets(t *testing.T) {
 	//////////////
 
 	// clean up test-inventories dir for a clean slate to test on
-	if err := os.RemoveAll("test-inventories"); err != nil {
+	if err := os.RemoveAll(c.InventoryRoot); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -9,11 +9,13 @@ import (
 	"strings"
 )
 
-var inventoryLocationVariableNotFound = errors.New("ansible-secrets-watcher: ANSIBLE_INVENTORIES_ROOT is a required environment variable. Please set an environment variable to define where the Ansible inventories directory is located in relation to the root of this repository.")
+var inventoryLocationVariableNotFound = errors.New("ansible-secrets-watcher: ANSIBLE_INVENTORIES_ROOT is a required environment variable. Please set an environment variable to define where the Ansible inventories directory is located relative to the root of this repository.")
 var inventoryRootNotFound = errors.New("ansible-secrets-watcher: could not find provided inventory root")
 var plainTextSecretsFound = errors.New("ansible-secrets-watcher: found plaintext secrets")
-var secretsFileNameVariableNotFound = errors.New("ansible-secrets-watcher: ANSIBLE_SECRETS_FILE_NAME is a required environment variable. Please set an environment variable to define where the Ansible inventories directory is located in relation to the root of this repository.")
+var secretsFileNameVariableNotFound = errors.New("ansible-secrets-watcher: ANSIBLE_SECRETS_FILE_NAME is a required environment variable. Please set an environment variable to define where the Ansible inventories directory is located in relative to the root of this repository.")
 
+// conf holds configuration information such as where to find the Ansible inventories 
+// directory and which secrets file naming convention to look for
 type conf struct {
 	// filesystem location of the Ansible inventories directory to walk 
 	// and check for unencrypted Vault secrets
@@ -74,7 +76,7 @@ func (c *conf) checkForInventoryRoot() error {
 	// check that the inventory root file exists
 	if _, err := os.Stat(c.InventoryRoot); os.IsNotExist(err) {
 		log.Println(inventoryRootNotFound)
-		log.Println("ansible-secrets-watcher: searched in: %s but could not find inventory", c.InventoryRoot)
+		log.Printf("ansible-secrets-watcher: searched in: %v but could not find inventory", c.InventoryRoot)
 		return inventoryRootNotFound
 	}
 
