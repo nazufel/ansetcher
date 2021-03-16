@@ -1,3 +1,11 @@
+// main.go
+
+// Copyright 2020 Ryan Ross
+
+// Main function for the Ansible Secrets Watcher
+
+// ------------------------------------------------------------------------- //
+
 package main
 
 import "os"

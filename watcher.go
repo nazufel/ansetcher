@@ -1,3 +1,11 @@
+// watcher.go
+
+// Copyright 2020 Ryan Ross
+
+// Functionality for the Ansible Secrets Watcher
+
+// ------------------------------------------------------------------------- //
+
 package main
 
 import (
@@ -54,22 +62,6 @@ func watcher() error {
 	return nil
 }
 
-func (c *conf) getConfig() error {
-
-	if len(os.Getenv("ANSIBLE_INVENTORIES_ROOT")) == 0 {
-		return inventoryLocationVariableNotFound
-	}
-
-	c.InventoryRoot = os.Getenv("ANSIBLE_INVENTORIES_ROOT")
-
-	if len(os.Getenv("ANSIBLE_SECRETS_FILE_NAME")) == 0 {
-		return secretsFileNameVariableNotFound
-	}
-
-	c.SecretFileName = os.Getenv("ANSIBLE_SECRETS_FILE_NAME")
-	return nil
-}
-
 // checks to see if the inventory root passed exists, if not, it throws an error
 func (c *conf) checkForInventoryRoot() error {
 
@@ -123,6 +115,22 @@ func findPlainTextAnsibleSecrets(secretsFiles []string) ([]string, error) {
 	}
 
 	return plainTextSecretFiles, nil
+}
+
+func (c *conf) getConfig() error {
+
+	if len(os.Getenv("ANSIBLE_INVENTORIES_ROOT")) == 0 {
+		return inventoryLocationVariableNotFound
+	}
+
+	c.InventoryRoot = os.Getenv("ANSIBLE_INVENTORIES_ROOT")
+
+	if len(os.Getenv("ANSIBLE_SECRETS_FILE_NAME")) == 0 {
+		return secretsFileNameVariableNotFound
+	}
+
+	c.SecretFileName = os.Getenv("ANSIBLE_SECRETS_FILE_NAME")
+	return nil
 }
 
 // prints the error message when plaintext secrets are found

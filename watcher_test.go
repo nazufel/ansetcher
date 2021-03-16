@@ -1,3 +1,11 @@
+// watcher_test.go
+
+// Copyright 2020 Ryan Ross
+
+// Test cases for the Ansible Secrets Watcher
+
+// ------------------------------------------------------------------------- //
+
 package main
 
 import (
@@ -245,4 +253,37 @@ func (c *conf) Test_findAnsibleSecrets(t *testing.T) {
 	}
 }
 
+func Test_getConfig(t *testing.T) {
+	
+	var c conf
+
+	// test happy path with set variables
+
+	// set up the variables
+	os.Setenv("ANSIBLE_INVENTORIES_ROOT", "./inventories")
+	os.Setenv("ANSIBLE_SECRETS_FILE_NAME", "secrets.yaml")
+
+	err := c.getConfig()
+	if err != nil {
+		t.Errorf("expected to find environment variables, but did not")
+	}
+
+	// test unhappy path with variables unset
+
+	// test for not finding the inventory root
+	os.Unsetenv("ANSIBLE_INVENTORIES_ROOT")
+	err = c.getConfig()
+	if err != inventoryLocationVariableNotFound {
+		t.Errorf("expected to be unable to find environment variable: ANSIBLE_INVENTORIES_ROOT, but it was found.")
+	}
+
+	// test for not finding the secrets file name
+	os.Setenv("ANSIBLE_INVENTORIES_ROOT", "./inventories")
+	os.Unsetenv("ANSIBLE_SECRETS_FILE_NAME")
+	err = c.getConfig()
+	if err != secretsFileNameVariableNotFound {
+		t.Errorf("expected to be unable to find environment variable: ANSIBLE_SECRETS_FILE_NAME, but it was found.")
+	}
+
+}
 //EOF
