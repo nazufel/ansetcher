@@ -3,10 +3,13 @@ package main
 import (
 	"bufio"
 	"errors"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 )
 
 var inventoryRootNotFound = errors.New("could not find provided inventory root")
@@ -15,14 +18,16 @@ var plainTextSecretsFound = errors.New("found plaintext secrets")
 // watcher func boostraps the rest of the program
 func watcher() error {
 
-	inventoryRoot := "./inventories"
+	var c conf
 
-	err := checkForInventoryRoot(inventoryRoot)
+	c.getConfig("./ansible-secrets-watcher.yaml")
+
+	err := checkForInventoryRoot(c.InventoryRoot)
 	if err != nil {
 		return err
 	}
 
-	secretFiles, err := directoryWalk(inventoryRoot)
+	secretFiles, err := directoryWalk(c.InventoryRoot)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,6 +39,25 @@ func watcher() error {
 		return err
 	}
 	return nil
+}
+
+type conf struct {
+	InventoryRoot string
+}
+
+func (c *conf) getConfig(cf string) *conf {
+
+	f, err := ioutil.ReadFile(cf)
+	if err != nil {
+		log.Fatal("ansible-secrets-watcher could not find config file")
+	}
+
+	err = yaml.Unmarshal(f, c)
+	if err != nil {
+		log.Fatalf("unmarshal error: %v", err)
+	}
+
+	return c
 }
 
 // checks to see if the inventory root passed exists, if not, it throws an error
