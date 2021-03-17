@@ -51,8 +51,8 @@ Ansetcher runs as a git pre-commit hook as described above. The user does not ne
 
 ```sh
 git commit -am "commting some awesome new functionality"
-2020/11/02 14:26:47 ansible-secrets-watcher: ERROR! Found Ansible Vault secrets file in plaintext during commit: infrastructure/ansible/inventories/development/secrets.yml. Please encrypt the file and reattempt to commit.
-2020/11/02 14:26:47 ansible-secrets-watcher: ERROR! Found Ansible Vault secrets file in plaintext during commit: infrastructure/ansible/inventories/production/secrets.yml. Please encrypt the file and reattempt to commit.
+2020/11/02 14:26:47 ansetcher: ERROR! Found Ansible Vault secrets file in plaintext during commit: infrastructure/ansible/inventories/development/secrets.yml. Please encrypt the file and reattempt to commit.
+2020/11/02 14:26:47 ansetcher: ERROR! Found Ansible Vault secrets file in plaintext during commit: infrastructure/ansible/inventories/production/secrets.yml. Please encrypt the file and reattempt to commit.
 ```
 
 The program existed with an error, which stopped the commit. Checking the status shows there are files with uncommitted changes; thus, the commit was not executed:
