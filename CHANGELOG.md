@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [Released]
+
+## [1.0.2] - 2020-03-17
+### Added
+- Renamed the project. [@nazufel](https://github.com/nazufel)
+- Renamed all the docs and code.
 ## [1.0.1] - 2020-03-16
 ### Added
 - Two configuration options. [@nazufel](https://github.com/nazufel)
