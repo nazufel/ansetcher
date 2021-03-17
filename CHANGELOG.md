@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1] - 2020-03-16
 ### Added
-- Two configuration options to change the behavior of the secrets watcher.
+- Two configuration options. [@nazufel](https://github.com/nazufel)
 
 ## [1.0.0] - 2020-11-02
 ### Added

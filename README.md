@@ -1,6 +1,6 @@
-# Ansible Secrets Watcher
+# Ansetcher
 
-Ansible Secrets Watcher is a utility to run as a [git pre-commit hook](https://git-scm.com/docs/githooks#_pre_commit) to check for plaintext secrets files in an [Ansible](https://docs.ansible.com/) repository that should be encrypted with [Ansible Vault](https://docs.ansible.com/ansible/latest/cli/ansible-vault.html) before running a git commit in order to protect secrets from being committed into a source repo in plaintext.
+Ansetcher is a utility to run as a [git pre-commit hook](https://git-scm.com/docs/githooks#_pre_commit) to check for plaintext secrets files in an [Ansible](https://docs.ansible.com/) repository that should be encrypted with [Ansible Vault](https://docs.ansible.com/ansible/latest/cli/ansible-vault.html) before running a git commit in order to protect secrets from being committed into a source repo in plaintext.
 
 ## Install
 
@@ -14,7 +14,7 @@ If a user decides to pull down a prebuilt binary, they will still need to copy t
 
 ### Compiling from Source
 
-Ansible Secrets Watcher is written in [Golang](https://golang.org) (Go) and tested against version ```1.15.3```. To build from source, make sure you have [Go](https://golang.org/dl/) installed at the specified version or higher. If you have [GNU Make](https://www.gnu.org/software/make/) installed, then you can use the included [makefile](./makefile) to build the binary for you with the command, ```make package```. This will run all of the tests. create a ```releases/``` directory, and build three binaries for three different operating systems. This is the same process used to create the binaries above. 
+Ansetcher is written in [Golang](https://golang.org) (Go) and tested against version ```1.15.3```. To build from source, make sure you have [Go](https://golang.org/dl/) installed at the specified version or higher. If you have [GNU Make](https://www.gnu.org/software/make/) installed, then you can use the included [makefile](./makefile) to build the binary for you with the command, ```make package```. This will run all of the tests. create a ```releases/``` directory, and build three binaries for three different operating systems. This is the same process used to create the binaries above. 
 
 If you do want to run the build command yourself for reasons including, but not limited to, you need a different operating system or CPU architecture than what is provided, then you can run the following command:
 
@@ -30,9 +30,9 @@ By default, the ```go build``` command will use the calling system's operating s
 GOOS=freebsd GOARCH=riscv64 go build -o pre-commit
 ```
 
-## Using Ansible Secrets Watcher
+## Using Ansetcher
 
-The Ansible Secrets Watcher utility runs a pre-commit hook, as discussed above. Git will run any scripts or programs in the ```.git/hooks``` directory of a git repository. These will get called before the actual ```git commit``` is passed. If there's an error from the ```.git/hooks/pre-commit```, then ```git commit``` is aborted. This is the point. It allows to check for certain conditions before the commit is processed.
+The Ansetcher utility runs a pre-commit hook, as discussed above. Git will run any scripts or programs in the ```.git/hooks``` directory of a git repository. These will get called before the actual ```git commit``` is passed. If there's an error from the ```.git/hooks/pre-commit```, then ```git commit``` is aborted. This is the point. It allows to check for certain conditions before the commit is processed.
 
 ### Configurations
 
@@ -40,14 +40,14 @@ There is a little bit of set up required up front. The utility needs two environ
 
 | Name | Defaults | Example | Summary |
 | --- | --- | --- | --- |
-| ANSIBLE_INVENTORIES_ROOT | N/A | `./infrastructure/ansible/inventories` | The location of the directory where Ansible Inventories and their Vault-encrypted secrets are defined in relation to the root of the calling repository. Ansible Secrets Watcher will use this location to search for any secrets that are not encrypted by Ansible Vault. |
+| ANSIBLE_INVENTORIES_ROOT | N/A | `./infrastructure/ansible/inventories` | The location of the directory where Ansible Inventories and their Vault-encrypted secrets are defined in relation to the root of the calling repository. Ansetcher will use this location to search for any secrets that are not encrypted by Ansible Vault. |
 | ANSIBLE_SECRETS_FILE_NAME | N/A | `vault.yaml` | The name and file extension of Vault-encrypted files to look for within the *ANSIBLE_INVENTORIES_ROOT*. |
 
 It is recommended to add these environment variables to your shell's config file so that they are always available.
 
-### Running Ansible Secrets Watcher
+### Running Ansetcher
 
-Ansible Secrets Watcher runs as a git pre-commit hook as described above. The user does not need to interface with it directly after installation. Ansible Secrets Watcher will be called upon every `git commit` command. Here is an example of running a `git commit` where there are unencrypted secrets in the Ansible Inventories directory:
+Ansetcher runs as a git pre-commit hook as described above. The user does not need to interface with it directly after installation. Ansetcher will be called upon every `git commit` command. Here is an example of running a `git commit` where there are unencrypted secrets in the Ansible Inventories directory:
 
 ```sh
 git commit -am "commting some awesome new functionality"
@@ -87,4 +87,4 @@ Your branch is ahead of 'origin/main' by 1 commit.
 nothing added to commit but untracked files present (use "git add" to track)
 ```
 
-The commit worked without error since the Ansible Secrets Watcher did not find any unencrypted secrets.
+The commit worked without error since the Ansetcher did not find any unencrypted secrets.
