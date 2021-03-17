@@ -2,6 +2,11 @@
 
 # file to speed up development and usage
 
+# build the binary
+build:
+	$(clean_command)
+	go build -o pre-commit
+
 # package the binaries for different operating systems
 package:
 	$(clean_command)

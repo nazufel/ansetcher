@@ -2,7 +2,7 @@
 
 // Copyright 2020 Ryan Ross
 
-// Main function for the Ansible Secrets Watcher
+// Main function for the Ansetcher
 
 // ------------------------------------------------------------------------- //
 
